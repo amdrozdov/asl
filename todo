@@ -1,0 +1,34 @@
+++Minimal
++1. Wav parser
++2. Slice per second
++3. Channels split
++4. Add cmake/build/check
++5. Add CLI/UI [in progress]
++6. Push to GH
+
+Good ideas
+Quality:
+1. Unit tests and coverage
+2. Linter and code quality analysis
+3. Refactor api and make lib version + .so generation and doc generator
+4. Add travis ci
+
+Cool Features
+1. Multithreading for slicing batch (parametrized)
+2. Add networking thread (work as a slicer server) (2 binaries: cli and server)
+3. Add presision slice (1ms or less)
+4. Add kafka input integration (with fs data)
+5. Add S3 support for in/out files (for kafka usage)
+6. ?Stream slicer (get audio stream and slice every x seconds)
+
+?AI
+1. Add audio basic analysis integration (is music, is speach)
+2. add music analysis (bpm, tonality, etc..)
+3. language detection
+4. speech recognition
+
+In depth:
+1. Add more audio encoders
+2. mp3
+3. Flack
+
