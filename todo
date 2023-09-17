@@ -1,8 +1,13 @@
 Ideas
 Quality:
-1. Unit tests and coverage
-2. Refactor api and make lib version + .so generation and doc generator
-3. Add travis ci/gh actions
+1. Add travis ci/gh actions
+2. Unit tests and coverage
+3. Refactor api and make lib version + .so generation and doc generator
+
+In depth:
+1. Add more audio encoders
+2. mp3
+3. Flack
 
 Cool Features
 1. Multithreading for slicing batch (parametrized)
@@ -17,9 +22,4 @@ Cool Features
 2. add music analysis (bpm, tonality, etc..)
 3. language detection
 4. speech recognition
-
-In depth:
-1. Add more audio encoders
-2. mp3
-3. Flack
 
