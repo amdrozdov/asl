@@ -1,17 +1,8 @@
-++Minimal
-+1. Wav parser
-+2. Slice per second
-+3. Channels split
-+4. Add cmake/build/check
-+5. Add CLI/UI [in progress]
-+6. Push to GH
-
-Good ideas
+Ideas
 Quality:
 1. Unit tests and coverage
-2. Linter and code quality analysis
-3. Refactor api and make lib version + .so generation and doc generator
-4. Add travis ci
+2. Refactor api and make lib version + .so generation and doc generator
+3. Add travis ci/gh actions
 
 Cool Features
 1. Multithreading for slicing batch (parametrized)
