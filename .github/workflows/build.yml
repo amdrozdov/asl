@@ -30,5 +30,7 @@ jobs:
       steps:
         - name: install cppunit
           uses: actions/checkout@v2
+        - name: Build
+          run: mkdir build && cd build && cmake .. && cmake --build .
         - name: Run test cases
-          run: mkdir build && cd build && cmake .. && cmake --build . && ctest --output-on-failure
+          run: cd build && ctest --output-on-failure
