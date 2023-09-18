@@ -1,4 +1,4 @@
-name: ASL build pipeline
+name: ASL Unit test pipeline
 
 on:
   push:
@@ -16,3 +16,5 @@ jobs:
           run: cmake .
         - name: Build from source
           run: cmake --build .
+        - name: Run test cases
+          run: make test
