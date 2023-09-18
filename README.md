@@ -1,6 +1,9 @@
 # asl
 Audio analysis tool
 
+![Build status]
+(https://github.com/amdrozdov/asl/actions/workflows/build.yml/badge.svg)
+
 ### Usage example
 ```bash
 asl info -f samples/sample.wav
