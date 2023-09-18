@@ -34,11 +34,13 @@ namespace {
         std::pair<int, char*> file_b = read_file(b);
 
         if (file_a.first != file_b.first) {
+            std::cout << "Wrong size assertion" << std::endl;
             return false;
         }
 
         for (int i=0; i<file_a.first; i++){
             if (file_a.second[i] != file_b.second[i]){
+                std::cout << "Wrong byte assertion at " << i << std::endl;
                 return false;
             }
         }
@@ -78,8 +80,8 @@ namespace {
         as = AudioSlicer(test_file_2ch, true);
         EXPECT_EQ(as.Channels(), 2);
         as.slice(slices);
-        /* EXPECT_TRUE(compare("test_one_2ch.wav", "../tests/expected/test_one_2ch.wav")); */
-        /* EXPECT_TRUE(compare("test_two_2ch.wav", "../tests/expected/test_two_2ch.wav")); */
+        EXPECT_TRUE(compare("test_one_2ch.wav", "../tests/expected/test_one_2ch.wav"));
+        EXPECT_TRUE(compare("test_two_2ch.wav", "../tests/expected/test_two_2ch.wav"));
     }
 
     TEST(AudioFormatTest, TestSplit) {
