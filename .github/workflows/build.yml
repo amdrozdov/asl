@@ -10,9 +10,9 @@ jobs:
   build-and-test:
       runs-on: ubuntu-latest
       steps:
-      - uses: actions/checkout@v2
-      - name: install cppunit
-      run: cmake .
-      - name: CMake Configuration
-      run: cmake --build .
-      - name: Build from source
+        - name: install cppunit
+          uses: actions/checkout@v2
+        - name: CMake Configuration
+          run: cmake .
+        - name: Build from source
+          run: cmake --build .
