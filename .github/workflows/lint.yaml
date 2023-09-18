@@ -19,4 +19,4 @@ jobs:
         - name: Install cpplint
           run: pip install cpplint
         - name: Run cpplint
-          run: cd ../ && make lint
+          run: cpplint `find ./src -name \*.h -or -name \*.cpp`
