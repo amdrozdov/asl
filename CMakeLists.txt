@@ -12,3 +12,28 @@ include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}/external_includes/argparse/include/)
 
 add_executable(asl src/main.cpp src/slice.cpp)
+add_library(slice STATIC src/slice.cpp)
+
+include(ExternalProject)
+ExternalProject_Add(gtest
+  URL https://github.com/google/googletest/archive/release-1.8.0.zip
+  PREFIX ${CMAKE_CURRENT_BINARY_DIR}/gtest
+  INSTALL_COMMAND ""
+)
+ExternalProject_Get_Property(gtest source_dir binary_dir)
+include_directories(
+    ${CMAKE_CURRENT_BINARY_DIR}/gtest/src/gtest/googletest/include/)
+
+enable_testing()
+add_executable(
+  wav_test
+  tests/wav.cpp
+)
+target_include_directories(wav_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(wav_test ${CMAKE_CURRENT_BINARY_DIR}/gtest/src/gtest-build/googlemock/gtest/libgtest.a)
+target_link_libraries(wav_test ${CMAKE_CURRENT_BINARY_DIR}/gtest/src/gtest-build/googlemock/gtest/libgtest_main.a)
+target_link_libraries(wav_test slice)
+
+
+include(GoogleTest)
+gtest_discover_tests(wav_test)

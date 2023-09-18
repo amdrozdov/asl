@@ -1,7 +1,6 @@
 Ideas
 Quality:
 1. Add travis ci/gh actions
-2. Unit tests and coverage
 
 In depth:
 1. Add more audio encoders
@@ -9,6 +8,7 @@ In depth:
 3. Flack
 
 Cool Features
+0. Code coverage with gtest?
 1. Multithreading for slicing batch (parametrized)
 2. Add networking thread (work as a slicer server) (2 binaries: cli and server)
 3. Add presision slice (1ms or less)
