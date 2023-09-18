@@ -138,7 +138,7 @@ void AudioSlicer::extract_audio(chunk slice) {
     }
     assert(wavFile != nullptr);
     fwrite(&new_header, 1, sizeof(new_header), wavFile);
-    fwrite(data, 1, total_bytes * this->channels.size(), wavFile);
+    fwrite(data, 1, total_bytes, wavFile);
     fclose(wavFile);
 
     free(data);
