@@ -2,7 +2,6 @@ Ideas
 Quality:
 1. Add travis ci/gh actions
 2. Unit tests and coverage
-3. Refactor api and make lib version + .so generation and doc generator
 
 In depth:
 1. Add more audio encoders
@@ -16,6 +15,7 @@ Cool Features
 4. Add kafka input integration (with fs data)
 5. Add S3 support for in/out files (for kafka usage)
 6. ?Stream slicer (get audio stream and slice every x seconds)
+7. Refactor api and make lib version + .so generation and doc generator
 
 ?AI
 1. Add audio basic analysis integration (is music, is speach)
