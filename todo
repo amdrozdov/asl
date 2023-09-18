@@ -5,7 +5,7 @@ In depth:
 3. Flack
 
 Cool Features
-0. Code coverage with gtest?
+0. Code coverage with gtest? (https://medium.com/@naveen.maltesh/generating-code-coverage-report-using-gnu-gcov-lcov-ee54a4de3f11)
 1. Multithreading for slicing batch (parametrized)
 2. Add networking thread (work as a slicer server) (2 binaries: cli and server)
 3. Add presision slice (1ms or less)
