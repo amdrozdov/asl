@@ -78,8 +78,8 @@ namespace {
         as = AudioSlicer(test_file_2ch, true);
         EXPECT_EQ(as.Channels(), 2);
         as.slice(slices);
-        /* EXPECT_TRUE(compare("test_one_2ch.wav", "../tests/expected/test_one_2ch.wav")); */
-        /* EXPECT_TRUE(compare("test_two_2ch.wav", "../tests/expected/test_two_2ch.wav")); */
+        EXPECT_TRUE(compare("test_one_2ch.wav", "../tests/expected/test_one_2ch.wav"));
+        EXPECT_TRUE(compare("test_two_2ch.wav", "../tests/expected/test_two_2ch.wav"));
     }
 
     TEST(AudioFormatTest, TestSplit) {
