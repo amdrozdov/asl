@@ -34,7 +34,9 @@ namespace {
         std::pair<int, char*> file_b = read_file(b);
 
         if (file_a.first != file_b.first) {
-            std::cout << "Wrong size assertion" << std::endl;
+            std::cout << "Wrong size assertion:";
+            std::cout << " " << file_a.first << " vs";
+            std::cout << " " << file_b.first << std::endl;
             return false;
         }
 
