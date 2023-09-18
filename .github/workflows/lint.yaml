@@ -7,7 +7,7 @@ on:
       branches: [ main ]
 
 jobs:
-  build_all:
+  cpplint:
       runs-on: ubuntu-latest
       steps:
         - name: install cppunit
@@ -16,5 +16,7 @@ jobs:
           run: cmake .
         - name: Build from source
           run: cmake --build .
+        - name: Install cpplint
+          run: pip install cpplint
         - name: Run cpplint
           run: make lint

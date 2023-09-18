@@ -7,7 +7,7 @@ clean:
 lint:
 	cpplint `find ./src -name \*.h -or -name \*.cpp`
 test:
-	cd build && ctest
+	cd build && ctest --output-on-failure
 tlog:
 	cat build/Testing/Temporary/LastTest.log
 check:
