@@ -17,4 +17,5 @@ mkdir -p build && cd build && cmake ../ && cmake --build .
 ### Test build
 ```
 pip install cpplint
+make rebuild && make lint && make test
 ```
