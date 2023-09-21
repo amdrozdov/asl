@@ -5,6 +5,7 @@
 
 #include <stdint.h>
 
+// Based on http://soundfile.sapp.org/doc/WaveFormat/
 typedef struct WAV_HEADER {
     char RIFF[4];             // RIFF section identifier "RIFF"
     int ChunkSize;            // size of section
@@ -14,7 +15,7 @@ typedef struct WAV_HEADER {
     int16_t AudioFormat;    // encoding format
     int16_t NumOfChan;      // #of channels in the audio (mono/stereo)
     int SamplesPerSec;        // sample rate Hz
-    int bytesPerSec;          // bytes oer second
+    int bytesPerSec;          // bytes per second
     int16_t blockAlign;     // alignement
     int16_t bitsPerSample;  // bit depth (8/16/etc bits per sample)
     char Subchunk2ID[4];      // data section

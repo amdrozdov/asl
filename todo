@@ -1,18 +1,19 @@
 Ideas
 In depth:
-1. Add more audio encoders
-2. mp3
-3. Flack
+1. Add more audio encoders (mu-law/a-law)
+2. Add presision slice (1ms or less)
+
+Quality:
+1. Code coverage with gtest? (https://medium.com/@naveen.maltesh/generating-code-coverage-report-using-gnu-gcov-lcov-ee54a4de3f11)
 
 Cool Features
-0. Code coverage with gtest? (https://medium.com/@naveen.maltesh/generating-code-coverage-report-using-gnu-gcov-lcov-ee54a4de3f11)
 1. Multithreading for slicing batch (parametrized)
 2. Add networking thread (work as a slicer server) (2 binaries: cli and server)
-3. Add presision slice (1ms or less)
-4. Add kafka input integration (with fs data)
-5. Add S3 support for in/out files (for kafka usage)
-6. ?Stream slicer (get audio stream and slice every x seconds)
-7. Refactor api and make lib version + .so generation and doc generator
+3. Add kafka input integration (with fs data)
+4. Add S3 support for in/out files (for kafka usage)
+5. ?Stream slicer (get audio stream and slice every x seconds)
+6. ?Refactor api and make lib version + .so generation and doc generator
+7. [?] Flack
 
 ?AI
 1. Add audio basic analysis integration (is music, is speach)

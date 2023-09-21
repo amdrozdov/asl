@@ -4,6 +4,7 @@
 #define SRC_SLICE_H_
 
 #include <stdint.h>
+#include <cstdio>
 
 #include <string>
 #include <vector>
@@ -16,19 +17,35 @@ typedef struct {
         std::string filename;
 } chunk;
 
+const int16_t CT_LPCM = 0x1;
+const int16_t CT_MSADPCM = 0x2;
+const int16_t CT_IEEEFP = 0x3;
+const int16_t CT_IBM_CVSD = 0x5;
+const int16_t CT_MS_ALAW = 0x6;
+const int16_t CT_MS_MLAW = 0x7;
+
+
 class AudioSlicer{
  private:
+        // Class method pointer type f_ptr
+        typedef void(AudioSlicer::*f_ptr)();
+        // dict(id, func_ptr)
+        std::map<int16_t, f_ptr > codecs;
+
+        static std::map<int16_t, std::string> format_mapping;
         bool is_verbose;
         wav_header header;
         std::string filename;
         std::string format_prefix;
         double num_samples;
         std::vector<char*> channels;
-        std::map<int16_t, std::string> format_mapping;
         double duration;
 
-        void load_formats();
-        void read();
+        void lpcm_decoder();
+        void mu_law_decoder();
+        void read_audio();
+        FILE* read_header();
+        void load_channels(char *buf);
         void extract_audio(chunk slice);
         void init(const std::string& fname);
 
@@ -44,7 +61,7 @@ class AudioSlicer{
             return int32_t(this->header.bitsPerSample); }
         inline double Duration() { return this->duration; }
         inline std::string Filename() { return this->filename; }
-        inline int Channels() { return this->channels.size(); }
+        inline int Channels() { return this->header.NumOfChan; }
         void slice(std::vector<chunk> chunks);
         void split_channels(std::string out_prefix);
 };

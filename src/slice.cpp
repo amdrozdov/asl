@@ -12,29 +12,27 @@
 
 using namespace std;  // NOLINT [build/namespaces]
 
-
-void AudioSlicer::load_formats() {
-    this->format_mapping = map<int16_t, string>();
-    format_mapping[0x1] = "Linear PCM";
-    format_mapping[0x2] = "Microsoft ADPCM";
-    format_mapping[0x3] = "IEEE floating-point";
-    format_mapping[0x5] = "IBM CVSD";
-    format_mapping[0x6] = "Microsoft ALAW (8-bit ITU-T G.711BA ALAW)";
-    format_mapping[0x7] = "Microsoft M-LAW (8-bit ITU-T G.711 M-LAW";
-    format_mapping[0x11] = "Intel IMA/DVI ADPCM";
-    format_mapping[0x16] = "ITU G.723 ADPCM";
-    format_mapping[0x17] = "Dialogic OKI ADPCM";
-    format_mapping[0x30] = "Dolby AAC";
-    format_mapping[0x31] = "Microsoft GSM 6.10";
-    format_mapping[0x36] = "Rockwell ADPCM";
-    format_mapping[0x40] = "ITU G.721 ADPCM";
-    format_mapping[0x42] = "Microsoft MSG723";
-    format_mapping[0x45] = "ITU-T G.726";
-    format_mapping[0x64] = "APICOM G.726 ADPCM";
-    format_mapping[0x101] = "IBM M-LAW";
-    format_mapping[0x102] = "IBM A-LAW";
-    format_mapping[0x103] = "IBM ADPCM";
-}
+map<int16_t, string> AudioSlicer::format_mapping = {
+    {CT_LPCM, "Linear PCM"},
+    {CT_MSADPCM, "Microsoft ADPCM"},
+    {CT_IEEEFP, "IEEE floating-point"},
+    {CT_IBM_CVSD, "IBM CVSD"},
+    {CT_MS_ALAW, "Microsoft ALAW (8-bit ITU-T G.711BA ALAW)"},
+    {CT_MS_MLAW, "Microsoft M-LAW (8-bit ITU-T G.711 M-LAW"},
+    {0x11, "Intel IMA/DVI ADPCM"},
+    {0x16, "ITU G.723 ADPCM"},
+    {0x17, "Dialogic OKI ADPCM"},
+    {0x30, "Dolby AAC"},
+    {0x31, "Microsoft GSM 6.10"},
+    {0x36, "Rockwell ADPCM"},
+    {0x40, "ITU G.721 ADPCM"},
+    {0x42, "Microsoft MSG723"},
+    {0x45, "ITU-T G.726"},
+    {0x64, "APICOM G.726 ADPCM"},
+    {0x101, "IBM M-LAW"},
+    {0x102, "IBM A-LAW"},
+    {0x103, "IBM ADPCM"}
+};
 
 string AudioSlicer::audio_format() {
     string res = std::to_string(this->header.AudioFormat) + " (";
@@ -44,9 +42,93 @@ string AudioSlicer::audio_format() {
 
 void AudioSlicer::init(const string& fname) {
     this->filename = fname;
-    this->load_formats();
-    this->read();
+    FILE* wavFile = this->read_header();
+    fclose(wavFile);
     this->is_verbose = false;
+
+    this->codecs = {
+        {CT_LPCM, &AudioSlicer::lpcm_decoder},
+        {CT_MS_MLAW, &AudioSlicer::mu_law_decoder}
+    };
+}
+
+void AudioSlicer::load_channels(char *buf) {
+    int bytes_per_sample = this->header.bitsPerSample / 8.0;
+    map<int, int> ch_pos = map<int, int>();
+    this->channels = vector<char*>();
+    for (int i=0; i < this->header.NumOfChan; i++) {
+        this->channels.push_back(
+            reinterpret_cast<char*>(malloc(
+                this->num_samples * this->header.bitsPerSample / 8.0)));
+        ch_pos[i] = 0;
+    }
+
+    int ch = 0;
+    for (int i=0; i < this->header.Subchunk2Size; i+=bytes_per_sample) {
+        for (int j=0; j < bytes_per_sample; j++) {
+            this->channels[ch][ch_pos[ch]++] = buf[i+j];
+        }
+        ch = (ch+1) % (this->channels.size());
+    }
+    free(buf);
+}
+
+void AudioSlicer::lpcm_decoder() {
+    FILE* wavFile = this->read_header();
+    char *buf = reinterpret_cast<char*>(malloc(this->header.Subchunk2Size));
+    size_t was_rd = fread(buf, 1, this->header.Subchunk2Size, wavFile);
+    assert(was_rd);
+    fclose(wavFile);
+
+    this->load_channels(buf);
+}
+
+void AudioSlicer::mu_law_decoder() {
+    FILE* wavFile = this->read_header();
+    char *buf = reinterpret_cast<char*>(
+        malloc(this->header.Subchunk2Size));
+    size_t was_rd = fread(buf, 1, this->header.Subchunk2Size, wavFile);
+    assert(was_rd);
+
+    // allocate decoded space 8 bit -> 16 bit = size * 2
+    int16_t *decoded_buf = reinterpret_cast<int16_t*>(
+        malloc(this->header.Subchunk2Size*2));
+    int16_t decoded = 0;
+    int16_t sign = 0;
+    int16_t segment = 0;
+    for (int i = 0; i < this->header.Subchunk2Size; i++) {
+        // invert sample
+        decoded = ~buf[i] & 0x00FF;
+        // get first bit (0x80 -> 0b10000000) + shift 7 = first bit
+        sign = (buf[i] & 0x80) >> 7;
+        // get segment 2,3,4 bits, 0x0070 = 0b111000 + shift 4 = 111
+        segment = (decoded & 0x0070) >> 4;
+        // get last 4 bits 0x000f = 0b1111
+        decoded = (decoded & 0x000f) << 1;
+
+        // The value 33 is the amount the end- points
+        // of the segments are offset from even powers of two.
+        // 0x0021 = 33
+        decoded += 0x0021;
+        // shift by segment and apply sign
+        decoded = decoded << segment;
+        if (sign) {
+            decoded -= 0x0021;
+        } else {
+            decoded = 0x0021 - decoded;
+        }
+        // normalize to 16 bit
+        decoded = decoded << 2;
+
+        // write decoded sample
+        decoded_buf[i] = decoded;
+    }
+
+    char *result_buf = reinterpret_cast<char*>(decoded_buf);
+    // set decoded bit depth value
+    // FIXME: need to recalculate header for LPCM
+    this->header.bitsPerSample = 16;
+    this->load_channels(result_buf);
 }
 
 AudioSlicer::AudioSlicer(const string& fname) {
@@ -58,7 +140,7 @@ AudioSlicer::AudioSlicer(const string& fname, bool is_verbose) {
     this->is_verbose = is_verbose;
 }
 
-void AudioSlicer::read() {
+FILE* AudioSlicer::read_header() {
     this->header = wav_header{};
 
     FILE* wavFile = fopen(this->filename.c_str(), "r");
@@ -81,28 +163,19 @@ void AudioSlicer::read() {
     }
     this->duration = this->num_samples / static_cast<double>(
         this->header.SamplesPerSec);
+    return wavFile;
+}
 
-    this->channels = vector<char*>();
-    map<int, int> ch_pos = map<int, int>();
-    for (int i=0; i < this->header.NumOfChan; i++) {
-        this->channels.push_back(
-            reinterpret_cast<char*>(malloc(
-                this->num_samples * bytes_per_sample)));
-        ch_pos[i] = 0;
-    }
-    char *buf = reinterpret_cast<char*>(malloc(this->header.Subchunk2Size));
-    size_t was_rd = fread(buf, 1, this->header.Subchunk2Size, wavFile);
-    assert(was_rd);
-
-    int ch = 0;
-    for (int i=0; i < this->header.Subchunk2Size; i+=bytes_per_sample) {
-        this->channels[ch][ch_pos[ch]++] = buf[i];
-        this->channels[ch][ch_pos[ch]++] = buf[i+1];
-        ch = (ch+1) % (this->channels.size());
+void AudioSlicer::read_audio() {
+    if (this->codecs.find(this->header.AudioFormat) == this->codecs.end()) {
+        cout << "Unsupported format ";
+        cout << this->format_mapping[header.AudioFormat] << endl;
+        exit(1);
     }
 
-    free(buf);
-    fclose(wavFile);
+    // Load required codec and call it (class method pointer)
+    f_ptr codec = this->codecs[header.AudioFormat];
+    (this->*codec)();
 }
 
 void AudioSlicer::extract_audio(chunk slice) {
@@ -149,6 +222,7 @@ void AudioSlicer::extract_audio(chunk slice) {
 }
 
 void AudioSlicer::split_channels(string out_prefix) {
+    this->read_audio();
     int byte_per_sec = this->header.bitsPerSample / 8;
     for (int i=0; i < this->channels.size(); i++) {
         wav_header new_header = this->header;
@@ -173,6 +247,7 @@ void AudioSlicer::split_channels(string out_prefix) {
 }
 
 void AudioSlicer::slice(vector<chunk> chunks) {
+    this->read_audio();
     for (int i=0; i < chunks.size(); i++) {
         assert(chunks[i].sec_start >= 0);
         assert(chunks[i].sec_end <= static_cast<int>(this->duration) + 1);
