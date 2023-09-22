@@ -33,3 +33,8 @@ mkdir -p build && cd build && cmake ../ && cmake --build .
 pip install cpplint
 make rebuild && make lint && make test
 ```
+
+### Important literature
+* [Wave PCM Format](http://soundfile.sapp.org/doc/WaveFormat/)
+* [Recommended Practices for Enhancing Digital Audio Compatibility in Multimedia Systems](https://www.cs.columbia.edu/~hgs/audio/dvi/IMA_ADPCM.pdf)
+* [Introduction to Digital Audio Coding and Standards](https://www.amazon.com/Introduction-Standards-Springer-International-Engineering/dp/1402073577)
