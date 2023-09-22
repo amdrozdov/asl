@@ -44,6 +44,10 @@ void AudioSlicer::init(const string& fname) {
     this->filename = fname;
     FILE* wavFile = this->read_header();
     fclose(wavFile);
+    if (this->header.AudioFormat == CT_MS_MLAW) {
+        wavFile = this->read_ulaw_header();
+        fclose(wavFile);
+    }
     this->is_verbose = false;
 
     this->codecs = {
@@ -84,7 +88,7 @@ void AudioSlicer::lpcm_decoder() {
 }
 
 void AudioSlicer::mu_law_decoder() {
-    FILE* wavFile = this->read_header();
+    FILE* wavFile = this->read_ulaw_header();
     char *buf = reinterpret_cast<char*>(
         malloc(this->header.Subchunk2Size));
     size_t was_rd = fread(buf, 1, this->header.Subchunk2Size, wavFile);
@@ -125,9 +129,16 @@ void AudioSlicer::mu_law_decoder() {
     }
 
     char *result_buf = reinterpret_cast<char*>(decoded_buf);
-    // set decoded bit depth value
-    // FIXME: need to recalculate header for LPCM
-    this->header.bitsPerSample = 16;
+
+    // Set audio format Liner PCM
+    this->header.AudioFormat = CT_LPCM;
+    // Set decoded sizes 8bit -> 16 bit
+    this->header.bitsPerSample *= 2;
+    this->header.bytesPerSec *= 2;
+    this->header.Subchunk2Size *= 2;
+    // Set LPCM header size
+    this->header.Subchunk1Size = 0x10;
+
     this->load_channels(result_buf);
 }
 
@@ -151,6 +162,67 @@ FILE* AudioSlicer::read_header() {
 
     size_t was_read = fread(&header, 1, sizeof(wav_header), wavFile);
     assert(was_read);
+    int bytes_per_sample = this->header.bitsPerSample / 8.0;
+
+    this->num_samples = static_cast<double>(
+        header.Subchunk2Size) / static_cast<double>(
+        (header.NumOfChan) * bytes_per_sample);
+    this->format_prefix = "Unknown";
+    if (this->format_mapping.find(
+            header.AudioFormat) != this->format_mapping.end()) {
+        this->format_prefix = this->format_mapping[header.AudioFormat];
+    }
+    this->duration = this->num_samples / static_cast<double>(
+        this->header.SamplesPerSec);
+    return wavFile;
+}
+
+FILE* AudioSlicer::read_ulaw_header() {
+    // Read modified structure for MS u-law format
+    // Probably need to refactor it
+    // Explanation: TODO
+    this->header = wav_header{};
+
+    ulaw_header head = ulaw_header{};
+
+    FILE* wavFile = fopen(this->filename.c_str(), "r");
+    if (wavFile == nullptr) {
+        cout << "Unable to read wave file: " << this->filename << endl;
+    }
+    assert(wavFile != nullptr);
+
+    size_t was_read = fread(&head, 1, sizeof(ulaw_header), wavFile);
+    assert(was_read);
+
+    this->header.RIFF[0] = head.RIFF[0];
+    this->header.RIFF[1] = head.RIFF[1];
+    this->header.RIFF[2] = head.RIFF[2];
+    this->header.RIFF[3] = head.RIFF[3];
+    this->header.ChunkSize = head.ChunkSize;
+    this->header.WAVE[0] = head.WAVE[0];
+    this->header.WAVE[1] = head.WAVE[1];
+    this->header.WAVE[2] = head.WAVE[2];
+    this->header.WAVE[3] = head.WAVE[3];
+
+    this->header.fmt[0] = head.fmt[0];
+    this->header.fmt[1] = head.fmt[1];
+    this->header.fmt[2] = head.fmt[2];
+    this->header.fmt[3] = head.fmt[3];
+
+    this->header.Subchunk1Size = head.Subchunk1Size;
+    this->header.AudioFormat = head.AudioFormat;
+    this->header.NumOfChan = head.NumOfChan;
+    this->header.SamplesPerSec = head.SamplesPerSec;
+    this->header.bytesPerSec = head.bytesPerSec;
+    this->header.blockAlign = head.blockAlign;
+    this->header.bitsPerSample = head.bitsPerSample;
+
+    this->header.Subchunk2ID[0] = head.Subchunk2ID[0];
+    this->header.Subchunk2ID[1] = head.Subchunk2ID[1];
+    this->header.Subchunk2ID[2] = head.Subchunk2ID[2];
+    this->header.Subchunk2ID[3] = head.Subchunk2ID[3];
+    this->header.Subchunk2Size = head.Subchunk2Size;
+
     int bytes_per_sample = this->header.bitsPerSample / 8.0;
 
     this->num_samples = static_cast<double>(

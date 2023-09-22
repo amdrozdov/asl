@@ -1,7 +1,7 @@
 // Copyright 2023 Andrei Drozdov
 
-#ifndef SRC_WAV_H_
-#define SRC_WAV_H_
+#ifndef SRC_FORMATS_WAV_H_
+#define SRC_FORMATS_WAV_H_
 
 #include <stdint.h>
 
@@ -22,4 +22,4 @@ typedef struct WAV_HEADER {
     int Subchunk2Size;        // Size of the data section
 } wav_header;
 
-#endif  // SRC_WAV_H_
+#endif  // SRC_FORMATS_WAV_H_

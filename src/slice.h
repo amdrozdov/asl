@@ -9,7 +9,9 @@
 #include <string>
 #include <vector>
 #include <map>
-#include "./wav.h"
+
+#include "./formats/wav.h"
+#include "./formats/ulaw.h"
 
 typedef struct {
     int sec_start;
@@ -45,6 +47,7 @@ class AudioSlicer{
         void mu_law_decoder();
         void read_audio();
         FILE* read_header();
+        FILE* read_ulaw_header();
         void load_channels(char *buf);
         void extract_audio(chunk slice);
         void init(const std::string& fname);
