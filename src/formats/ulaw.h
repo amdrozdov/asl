@@ -7,6 +7,7 @@
 
 // Based on
 // https://www.dsprelated.com/showthread/speechcoding/601-1.php
+// Works onnly for MS Ulaw
 typedef struct ULAW_HEADER {
     char RIFF[4];             // RIFF section identifier "RIFF"
     int ChunkSize;            // size of section

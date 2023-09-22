@@ -1,6 +1,6 @@
 Ideas
 In depth:
-1. Add more audio encoders (mu-law/a-law)
+1. Add a-law decoder
 2. Add presision slice (1ms or less)
 
 Quality:
@@ -14,6 +14,7 @@ Cool Features
 5. ?Stream slicer (get audio stream and slice every x seconds)
 6. ?Refactor api and make lib version + .so generation and doc generator
 7. [?] Flack
+?8. Add encoder for u-law/m-law (to store output)
 
 ?AI
 1. Add audio basic analysis integration (is music, is speach)
