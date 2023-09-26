@@ -1,24 +1,11 @@
 Ideas
 In depth:
-1. Add a-law decoder
+1. ADAPCM decoder
 2. Add presision slice (1ms or less)
 
 Quality:
 1. Code coverage with gtest? (https://medium.com/@naveen.maltesh/generating-code-coverage-report-using-gnu-gcov-lcov-ee54a4de3f11)
 
-Cool Features
-1. Multithreading for slicing batch (parametrized)
-2. Add networking thread (work as a slicer server) (2 binaries: cli and server)
-3. Add kafka input integration (with fs data)
-4. Add S3 support for in/out files (for kafka usage)
-5. ?Stream slicer (get audio stream and slice every x seconds)
-6. ?Refactor api and make lib version + .so generation and doc generator
-7. [?] Flack
-?8. Add encoder for u-law/m-law (to store output)
-
-?AI
-1. Add audio basic analysis integration (is music, is speach)
-2. add music analysis (bpm, tonality, etc..)
-3. language detection
-4. speech recognition
-
+Cool Features (maybe later)
+1. mp3
+2. flac
