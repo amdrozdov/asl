@@ -11,10 +11,10 @@
 
 
 namespace {
-    const std::string test_file = "../samples/addf8-mulaw-GW.wav";
-    const std::string test_format = "7 (Microsoft M-LAW (8-bit ITU-T G.711 M-LAW)";
+    const std::string test_file = "../samples/addf8-Alaw-GW.wav";
+    const std::string test_format = "6 (Microsoft ALAW (8-bit ITU-T G.711BA ALAW))";
 
-    TEST(AudioUlawFormatTest, TestRead) {
+    TEST(AudioAlawFormatTest, TestRead) {
         auto as = AudioSlicer(test_file);
         EXPECT_TRUE(as.Filename() == test_file);
         EXPECT_EQ(as.Size(), 23808);
@@ -26,16 +26,16 @@ namespace {
         EXPECT_EQ(as.Duration(), 2.976);
     }
     
-    TEST(AudioULawFormatTest, TestSlice) {
+    TEST(AudioALawFormatTest, TestSlice) {
         // Checking mono recording
         std::vector<chunk> slices = {
-            chunk{1, 2, "test_ulaw_one.wav"}
+            chunk{1, 2, "test_alaw_one.wav"}
         };
         auto as = AudioSlicer(test_file, true);
         EXPECT_EQ(as.Channels(), 1);
         as.slice(slices);
         // Binary compare the result with expected files
         EXPECT_TRUE(compare(
-            "test_ulaw_one.wav", "../tests/expected/test_ulaw_one.wav"));
+            "test_alaw_one.wav", "../tests/expected/test_alaw_one.wav"));
     }
 }

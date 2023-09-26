@@ -43,7 +43,16 @@ target_link_libraries(ulaw_test ${CMAKE_CURRENT_BINARY_DIR}/gtest/src/gtest-buil
 target_link_libraries(ulaw_test ${CMAKE_CURRENT_BINARY_DIR}/gtest/src/gtest-build/googlemock/gtest/libgtest_main.a)
 target_link_libraries(ulaw_test slice)
 
+add_executable(
+  alaw_test
+  tests/alaw.cpp
+)
+target_include_directories(alaw_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(alaw_test ${CMAKE_CURRENT_BINARY_DIR}/gtest/src/gtest-build/googlemock/gtest/libgtest.a)
+target_link_libraries(alaw_test ${CMAKE_CURRENT_BINARY_DIR}/gtest/src/gtest-build/googlemock/gtest/libgtest_main.a)
+target_link_libraries(alaw_test slice)
 
 include(GoogleTest)
 gtest_discover_tests(wav_test)
 gtest_discover_tests(ulaw_test)
+gtest_discover_tests(alaw_test)

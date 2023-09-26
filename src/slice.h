@@ -45,6 +45,7 @@ class AudioSlicer{
 
         void lpcm_decoder();
         void mu_law_decoder();
+        void a_law_decoder();
         void read_audio();
         FILE* read_header();
         FILE* read_ulaw_header();

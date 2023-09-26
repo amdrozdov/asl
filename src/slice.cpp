@@ -44,7 +44,8 @@ void AudioSlicer::init(const string& fname) {
     this->filename = fname;
     FILE* wavFile = this->read_header();
     fclose(wavFile);
-    if (this->header.AudioFormat == CT_MS_MLAW) {
+    int format = this->header.AudioFormat;
+    if (format == CT_MS_MLAW || format == CT_MS_ALAW) {
         wavFile = this->read_ulaw_header();
         fclose(wavFile);
     }
@@ -52,7 +53,8 @@ void AudioSlicer::init(const string& fname) {
 
     this->codecs = {
         {CT_LPCM, &AudioSlicer::lpcm_decoder},
-        {CT_MS_MLAW, &AudioSlicer::mu_law_decoder}
+        {CT_MS_MLAW, &AudioSlicer::mu_law_decoder},
+        {CT_MS_ALAW, &AudioSlicer::a_law_decoder}
     };
 }
 
@@ -85,6 +87,61 @@ void AudioSlicer::lpcm_decoder() {
     fclose(wavFile);
 
     this->load_channels(buf);
+}
+
+void AudioSlicer::a_law_decoder() {
+    FILE* wavFile = this->read_ulaw_header();
+    char *buf = reinterpret_cast<char*>(
+        malloc(this->header.Subchunk2Size));
+    size_t was_rd = fread(buf, 1, this->header.Subchunk2Size, wavFile);
+    assert(was_rd);
+
+    int16_t *decoded_buf = reinterpret_cast<int16_t*>(
+        malloc(this->header.Subchunk2Size*2));
+
+    int8_t tmp = 0;
+    int8_t segment = 0;
+    int8_t sign = 0;
+    int16_t decoded = 0;
+    for (int i = 0; i < this->header.Subchunk2Size; i++) {
+        // invert even bits of sample (0x0005 -> 0b101)
+        tmp = buf[i] ^ 0x55;
+        // get first bit
+        sign = (tmp & 0x80) >> 7;
+        // get the data
+        decoded = ((tmp & 0x000f) << 1) | 0x0001;
+        // get the segment bits data
+        segment = (tmp & 0x0070) >> 4;
+        // Update segment boundaries
+        if ((segment - 1) == 0) {
+            decoded |= 0x0020;
+        } else if ((segment - 1) > 0) {
+            decoded |= 0x0020;
+            decoded = decoded << (segment - 1);
+        }
+        // Remove segment data
+        decoded = decoded << 3;
+        // Set sign
+        if (sign) {
+            decoded = 0-decoded;
+        }
+
+        // Store the result sample
+        decoded_buf[i] = decoded;
+    }
+
+    char *result_buf = reinterpret_cast<char*>(decoded_buf);
+
+    // Set audio format Liner PCM
+    this->header.AudioFormat = CT_LPCM;
+    // Set decoded sizes 8bit -> 16 bit
+    this->header.bitsPerSample *= 2;
+    this->header.bytesPerSec *= 2;
+    this->header.Subchunk2Size *= 2;
+    // Set LPCM header size
+    this->header.Subchunk1Size = 0x10;
+
+    this->load_channels(result_buf);
 }
 
 void AudioSlicer::mu_law_decoder() {
@@ -178,9 +235,10 @@ FILE* AudioSlicer::read_header() {
 }
 
 FILE* AudioSlicer::read_ulaw_header() {
-    // Read modified structure for MS u-law format
+    // Read modified structure for MS u-law and a-law format
     // Probably need to refactor it
-    // Explanation: TODO
+    // Explanation: MS a-law and mu-law formats
+    // are extended with fact section
     this->header = wav_header{};
 
     ulaw_header head = ulaw_header{};
