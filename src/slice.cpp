@@ -34,7 +34,7 @@ map<int16_t, string> AudioSlicer::format_mapping = {
     {0x103, "IBM ADPCM"}
 };
 
-string AudioSlicer::audio_format() {
+const string AudioSlicer::audio_format() {
     string res = std::to_string(this->header.AudioFormat) + " (";
     res += this->format_prefix + ")";
     return res;
@@ -308,7 +308,7 @@ void AudioSlicer::read_audio() {
     (this->*codec)();
 }
 
-void AudioSlicer::extract_audio(chunk slice) {
+void AudioSlicer::extract_audio(const chunk& slice) {
     // Do not forget bitsPerSample
     // we need to write bps/8 bytes per sample
     int byte_per_sec = this->header.bitsPerSample / 8;
@@ -351,7 +351,7 @@ void AudioSlicer::extract_audio(chunk slice) {
     }
 }
 
-void AudioSlicer::split_channels(string out_prefix) {
+void AudioSlicer::split_channels(const string& out_prefix) {
     this->read_audio();
     int byte_per_sec = this->header.bitsPerSample / 8;
     for (int i=0; i < this->channels.size(); i++) {
@@ -376,7 +376,7 @@ void AudioSlicer::split_channels(string out_prefix) {
     }
 }
 
-void AudioSlicer::slice(vector<chunk> chunks) {
+void AudioSlicer::slice(const vector<chunk>& chunks) {
     this->read_audio();
     for (int i=0; i < chunks.size(); i++) {
         assert(chunks[i].sec_start >= 0);

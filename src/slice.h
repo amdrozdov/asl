@@ -49,16 +49,17 @@ class AudioSlicer{
         void read_audio();
         FILE* read_header();
         FILE* read_ulaw_header();
+
         void load_channels(char *buf);
-        void extract_audio(chunk slice);
+        void extract_audio(const chunk& slice);
         void init(const std::string& fname);
 
  public:
         explicit AudioSlicer(const std::string& fname);
         AudioSlicer(const std::string& fname, bool is_verbose);
-        int BytesPerSec() { return this->header.bytesPerSec; }
-        int SampleRate() { return this->header.SamplesPerSec; }
-        std::string audio_format();
+
+        inline int BytesPerSec() { return this->header.bytesPerSec; }
+        inline int SampleRate() { return this->header.SamplesPerSec; }
         inline int64_t NumSamples() { return int64_t(num_samples); }
         inline int64_t Size() { return int64_t(this->header.Subchunk2Size); }
         inline int BitsPerSample() {
@@ -66,8 +67,10 @@ class AudioSlicer{
         inline double Duration() { return this->duration; }
         inline std::string Filename() { return this->filename; }
         inline int Channels() { return this->header.NumOfChan; }
-        void slice(std::vector<chunk> chunks);
-        void split_channels(std::string out_prefix);
+
+        const std::string audio_format();
+        void slice(const std::vector<chunk>& chunks);
+        void split_channels(const std::string& out_prefix);
 };
 
 #endif  // SRC_SLICE_H_
